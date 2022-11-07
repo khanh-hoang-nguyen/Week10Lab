@@ -31,10 +31,11 @@ import servlets.NoteServlet;
 
 /**
  *
- * @author pandawr
+ * @author Khanh Nguyen
  */
 public class AdminFilter implements Filter {
 
+    @Override
     public void doFilter(ServletRequest request, ServletResponse response,
             FilterChain chain)
             throws IOException, ServletException {
@@ -43,28 +44,28 @@ public class AdminFilter implements Filter {
         HttpSession session = httpRequest.getSession();
         String email = (String) session.getAttribute("email");
 
-        NoteService noteservice = new NoteService();
+        UserDB userDB = new UserDB();
 
         try {
-            List<Note> notes = noteservice.getAll(email);
-            for (int i = 0; i < notes.size(); i++) {
-                if (notes.get(i).getNoteId() != 1) {
-                    HttpServletResponse httpResponse = (HttpServletResponse) response;
-                    httpResponse.sendRedirect("notes");
-                    return;
-                }
+            User user = userDB.get(email);
+            if (user.getRole().getRoleId() != 1) {
+                HttpServletResponse httpResponse = (HttpServletResponse) response;
+                httpResponse.sendRedirect("notes");
+                return;
             }
         } catch (Exception ex) {
-            Logger.getLogger(NoteServlet.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(AdminFilter.class.getName()).log(Level.SEVERE, null, ex);
             request.setAttribute("message", "error");
         }
 
         chain.doFilter(request, response);
     }
-
+    
+    @Override
     public void destroy() {
     }
-
+    
+    @Override
     public void init(FilterConfig filterConfig) {
 
     }
